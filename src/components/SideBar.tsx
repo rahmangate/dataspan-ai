@@ -5,37 +5,54 @@ import Link from "next/link";
 import Logo from "./Logo";
 import Pill from "./Pill";
 import BinIcon from "./Bin";
-
+import { useStore } from "@/hooks/useStore";
+import RangeInput from "./RangeInput";
 export default function SideBar({ show, setter }: any) {
-  const [activeNav, setActiveNav] = useState("");
   const [selectType, setSelectType] = useState("Select All");
   const [range, setRange] = useState(0);
 
-  const [selectecdOptions, setSelectedOptions] = useState<string[]>([]);
+  const {
+    selectedClassFilter,
+    setSelectedClassFilter,
+    selectedMinRange,
+    setSelectedMinRange,
+    selectedMaxRange,
+    setSelectedMaxRange,
+    trigerRangeFilter,
+    setTriggerRangeFilter,
+  } = useStore();
 
-  const isActive = (text: string) =>
-    selectecdOptions?.find((opt) => opt == text) ? true : false;
+  const isActive = (className: string) =>
+    selectedClassFilter?.find((opt) => opt == className) ? true : false;
 
-  const onSelect = (text: string, value: boolean) => {
+  const onSelect = (className: string, value: boolean) => {
     let newList = [];
     if (value) {
-      newList = selectecdOptions.filter((opt) => opt != text) || [];
-      setSelectedOptions([...newList]);
+      newList = selectedClassFilter.filter((opt) => opt != className) || [];
+      setSelectedClassFilter([...newList]);
     } else {
-      newList = [...selectecdOptions];
-      newList.push(`${text}`);
-      setSelectedOptions([...newList]);
+      newList = [...selectedClassFilter];
+      newList.push(`${className}`);
+      setSelectedClassFilter([...newList]);
     }
   };
 
+  const clearAll = () => {
+    setSelectedClassFilter([]);
+    setSelectType("Select All");
+    //handleSearchAll([]);
+    setSelectedMinRange(0);
+    setSelectedMaxRange(2);
+  };
+
   const options = [
-    "Elbow positive",
-    "Fingers positive",
-    "Humerus",
-    "Forearm fracture",
-    "Humerus fracture",
-    "Shoulder fracture",
-    "Wrist positive",
+    { label: "Elbow positive", className: "elbow_positive" },
+    { label: "Fingers positive", className: "fingers_positive" },
+    { label: "Humerus", className: "humerus" },
+    { label: "Forearm fracture", className: "forearm_fracture" },
+    { label: "Humerus fracture", className: "humerus_fracture" },
+    { label: "Shoulder fracture", className: "shoulder_fracture" },
+    { label: "Wrist positive", className: "wrist_positive" },
   ];
 
   let variant = [
@@ -52,26 +69,6 @@ export default function SideBar({ show, setter }: any) {
   const appendClass = show
     ? " fixed z-50 max-sm:ml-[0px] max-md:ml-[0px] transform-none"
     : "  ";
-  // Clickable menu items
-  const MenuItem = ({ icon, name, route }: any) => {
-    const colorClass =
-      activeNav === name
-        ? "text-primary font-bold"
-        : "text-sub-500 hover:text-primary";
-
-    return (
-      <Link
-        href={route}
-        onClick={() => {
-          setter((oldVal: any) => !oldVal);
-        }}
-        className={`flex w-full gap-1 [&>*]:my-auto text-md pl-6 py-3 border-b-[1px] border-b-white/10 ${colorClass}`}
-      >
-        <div className="text-xl flex [&>*]:mx-auto w-[30px]">{icon}</div>
-        <div>{name}</div>
-      </Link>
-    );
-  };
 
   return (
     <>
@@ -91,9 +88,18 @@ export default function SideBar({ show, setter }: any) {
                   className={`text-[12px] cursor-pointer ${
                     selectType == text ? "text-blue" : "text-gray-400"
                   }`}
-                  onClick={() => setSelectType(text)}
+                  onClick={() => {
+                    if (text == "Select All") {
+                      setSelectedClassFilter([
+                        ...options?.map((opt) => opt.className),
+                      ]);
+                    } else {
+                      setSelectedClassFilter([]);
+                    }
+                    setSelectType(text);
+                  }}
                 >
-                  {text}{" "}
+                  {text}
                 </div>
               ))}
             </div>
@@ -102,14 +108,28 @@ export default function SideBar({ show, setter }: any) {
               {options.map((opt, i) => (
                 <Pill
                   key={i}
-                  text={options[i]}
-                  active={isActive(options[i])}
+                  text={opt.label}
+                  className={opt.className}
+                  active={isActive(opt.className)}
                   variant={variant[i]}
-                  onSelect={(text, active) => onSelect(text, active)}
+                  onSelect={(className, active) => onSelect(className, active)}
                 />
               ))}
             </div>
-            <div className="text-[16px] text-dark font-semibold mt-3 mb-2">
+            <RangeInput
+              rangeMin={selectedMinRange}
+              rangeMax={selectedMaxRange}
+              handleOnChangeSearch={(range) => {
+                setTriggerRangeFilter(range);
+              }}
+              setSelectedMaxRange={(maxRange) => {
+                setSelectedMaxRange(maxRange);
+              }}
+              setSelectedMinRange={(minRange) => {
+                setSelectedMinRange(minRange);
+              }}
+            />
+            {/* <div className="text-[16px] text-dark font-semibold mt-3 mb-2">
               Poligon range
             </div>
             <div className="flex justify-between text-[12px] text-dark">
@@ -134,9 +154,15 @@ export default function SideBar({ show, setter }: any) {
                   setRange(parseInt(ev.target.value));
                 }}
               />
-            </div>
+            </div> */}
+
             <div className="flex justify-between items-center mt-3 ">
-              <div className="flex items-center cursor-pointer">
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => {
+                  clearAll();
+                }}
+              >
                 <BinIcon />
                 <span className="text-[12px] mt-[5px] text-dark font-semibold">
                   Clear Filters

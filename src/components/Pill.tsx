@@ -2,12 +2,14 @@
 
 const Pill = ({
   text,
+  className,
   active,
   variant,
-  onSelect = (text, active) => {},
+  onSelect = (className, active) => {},
 }: {
   text: string;
   active: boolean;
+  className: string;
   onSelect: (text: string, value: boolean) => void;
   variant: "blue" | "green" | "sea" | "yellow" | "red" | "orange" | "purple";
 }) => {
@@ -18,7 +20,7 @@ const Pill = ({
         color[1]
       } ${active ? color[2] : ""}`}
       onClick={() => {
-        onSelect(text, active);
+        onSelect(className, active);
       }}
     >
       <div className={`w-[8px] h-[8px] rounded-full ${color[0]}`}></div>

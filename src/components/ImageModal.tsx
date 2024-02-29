@@ -3,21 +3,22 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import { PhotoData } from "@/utils/model";
 
 import Image from "next/image";
+import Polygon from "./Polygon";
+import { Suspense } from "react";
 
 const ImageModal = ({
   open,
-  image,
+  photoData,
   onClose,
 }: {
   open: boolean;
-  image: string;
+  photoData: PhotoData | null;
   onClose: () => void;
 }) => {
   return (
@@ -25,13 +26,21 @@ const ImageModal = ({
       {/*  <DialogTrigger>Open</DialogTrigger> */}
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-[14px] font-normal">
-            Are you absolutely sure?
-          </DialogTitle>
+          <DialogTitle className="text-[14px] font-normal"></DialogTitle>
         </DialogHeader>
-        <div className="h-[447px]">
-          {/*   <Image src="" width={500} height={500} alt="" /> */}
-        </div>
+        {photoData && (
+          <div className="h-[447px]">
+            <Image
+              src={photoData?.image}
+              width={800}
+              height={600}
+              alt=""
+              className="relative h-full"
+            />
+
+            <Polygon photo={photoData} />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

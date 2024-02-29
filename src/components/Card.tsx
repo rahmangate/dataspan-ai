@@ -1,28 +1,33 @@
 "use client";
 import Image from "next/image";
+import PolygonCanvas from "./Polygon";
+import { PhotoData } from "@/utils/model";
 
 const Card = ({
   text,
   image,
+  photoData,
   onView = () => {},
 }: {
-  text: string;
-  image: string;
+  text?: string;
+  image?: string;
+  photoData: PhotoData;
   onView: () => void;
 }) => {
   return (
     <div className="w-[100px] cursor-pointer" onClick={() => onView()}>
-      <div className="w-[100px] h-[100px] bg-gray-100 ">
-        {/*  <Image
-          src={image}
+      <div className="relative w-[100px] h-[100px] bg-gray-100 ">
+        <Image
+          src={photoData.thumbnail}
           width={600}
           height={600}
           alt=""
-          className="object-cover h-full w-full"
-        /> */}
+          className="relative object-cover h-full w-full"
+        />
+        <PolygonCanvas photo={photoData} />
       </div>
       <div className="text-[12px] w-[100px] text-dark font-light text-ellipsis whitespace-nowrap overflow-hidden ... ">
-        {text}
+        {photoData.name}
       </div>
     </div>
   );

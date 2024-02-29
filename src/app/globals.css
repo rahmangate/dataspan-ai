@@ -74,3 +74,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* styles.css */
+
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+
+  background-color: "#FFD75C"; /* Adjust track background color */
+  outline: none;
+  padding: 0;
+  border-radius: 9999px; /* Adjust to make rounder */
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 21px; /* Adjust thumb size */
+  height: 21px; /* Adjust thumb size */
+  background-color: white; /* Adjust thumb color */
+  border:6px solid #FFD75C; /* Adjust thumb border color */
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.range-slider::-moz-range-thumb {
+  width: 21px;
+    /* Adjust thumb size */
+    height: 21px;
+    /* Adjust thumb size */
+    background-color: white;
+    /* Adjust thumb color */
+    border: 6px solid #FFD75C;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}

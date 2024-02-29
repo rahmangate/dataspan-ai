@@ -32,9 +32,7 @@ export default function RootLayout({
               setter={setShowSidebar}
               router={router}
             />
-            <div className="px-1 md:px-4 pt-[10px] flex-grow w-full">
-              {children}
-            </div>
+            <div className="pt-[10px] flex-grow w-full">{children}</div>
           </div>
           {/* <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-100 h-[60px] pt-2">
             <div className="flex w-full justify-between ml-auto  mr-auto mr-auto max-w-[1500px] max-w-[1500px]:ml-auto max-w-[1400px]:mr-0">

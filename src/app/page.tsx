@@ -1,85 +1,113 @@
 "use client";
-import { Card, CardSkeleton } from "@/components/Card";
+
 import ImageModal from "@/components/ImageModal";
-import { DataRecord, viewAlbum } from "@/service/aws";
-import Image from "next/image";
+import { viewAlbum } from "@/service/aws";
+
 import { useEffect, useState } from "react";
 import { useStore } from "@/hooks/useStore";
+import { PhotoData } from "@/utils/model";
+
+import useFilter, { areAllNone } from "@/hooks/filter";
+
+import TabPane from "@/components/TabPane";
 
 export default function Home() {
   const {
+    allGroupsData,
+    setAllGroupsData,
     trainData,
     setTrainData,
     validData,
     setValidData,
     testData,
     setTestData,
+    selectedClassFilter,
+    selectedMinRange,
+    selectedMaxRange,
+    trigerRangeFilter,
     refresh,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState("All Groups");
+  const [activeTab, setActiveTab] = useState(0);
   const tabs = ["All Groups", "Train", "Valid", "Test"];
-  const [openModal, setOpenModal] = useState(false);
-  const skeleton = [1, 2, 3, 4, 5, 6];
+  const [openModal, setOpenModal] = useState<PhotoData | null>(null);
 
-  const data = [...trainData.data, ...validData.data, ...testData.data];
+  const [loading, setLoading] = useState(false);
+  const data = allGroupsData.data;
+  const { handleFilterData, responseData } = useFilter(data);
 
-  const [loadingTrainData, setLoadingTrainData] = useState(false);
-  const [loadingValueData, setLoadingValueData] = useState(false);
-  const [loadingTestData, setLoadingTestData] = useState(false);
+  const {
+    handleFilterData: handleFilterDataTrain,
+    responseData: responseDataTrain,
+  } = useFilter(trainData.data);
+
+  const {
+    handleFilterData: handleFilterDataValid,
+    responseData: responseDataValid,
+  } = useFilter(validData.data);
+
+  const {
+    handleFilterData: handleFilterDataTest,
+    responseData: responseDataTest,
+  } = useFilter(testData.data);
+
+  const handleFilterAll = (searchText: string[]) => {
+    let searchBy = searchText;
+    if (searchText.length > 0) {
+      searchBy.push("none");
+    }
+    if (areAllNone(searchBy)) {
+      searchBy = [];
+    }
+
+    handleFilterData([...allGroupsData.data], searchBy);
+    handleFilterDataTrain(trainData.data, searchBy);
+    handleFilterDataValid(validData.data, searchBy);
+    handleFilterDataTest(testData.data, searchBy);
+    searchBy = [];
+  };
+
+  const handleRangeFilter = (searchRange: string[]) => {
+    handleFilterData([...allGroupsData.data], searchRange);
+    handleFilterDataTrain(trainData.data, searchRange);
+    handleFilterDataValid(validData.data, searchRange);
+    handleFilterDataTest(testData.data, searchRange);
+  };
 
   useEffect(() => {
-    if (trainData.canFetch && trainData.data.length == 0) {
-      fetchTrainData();
-    }
-    if (validData.canFetch && validData.data.length == 0) {
-      fetchValueData();
-    }
-    if (testData.canFetch && testData.data.length == 0) {
-      fetchTestData();
-    }
+    handleFilterAll([...selectedClassFilter]);
+  }, [selectedClassFilter.length]);
+
+  useEffect(() => {
+    handleRangeFilter(trigerRangeFilter);
+  }, [trigerRangeFilter]);
+
+  useEffect(() => {
+    fetchAlbum();
   }, []);
 
-  const fetchTrainData = async () => {
-    setLoadingTrainData(true);
-    let resp = await viewAlbum("bone-fracture-detection/test/train/");
-    setLoadingTrainData(false);
+  const fetchAlbum = async () => {
+    setLoading(true);
+    const resp = await viewAlbum("bone-fracture-detection");
+    setLoading(false);
+
     if (resp.success && resp.data) {
-      console.log(resp.data);
-      setTrainData({ canFetch: false, data: resp.data });
+      setAllGroupsData({ canFetch: false, data: resp.data.allGroups });
+      setTrainData({ canFetch: false, data: resp.data.trainData });
+      setValidData({ canFetch: false, data: resp.data.validData });
+      setTestData({ canFetch: false, data: resp.data.testData });
       return;
     }
-    console.log(resp.message);
-  };
-  const fetchTestData = async () => {
-    setLoadingTrainData(true);
-    let resp = await viewAlbum("bone-fracture-detection/test/images/");
-    setLoadingTrainData(false);
-    if (resp.success && resp.data) {
-      console.log(resp.data);
-      setTrainData({ canFetch: false, data: resp.data });
-      return;
-    }
-    console.log(resp.message);
-  };
-  const fetchValueData = async () => {
-    setLoadingTrainData(true);
-    let resp = await viewAlbum("bone-fracture-detection/value/image/");
-    setLoadingTrainData(false);
-    if (resp.success && resp.data) {
-      console.log(resp.data);
-      setTrainData({ canFetch: false, data: resp.data });
-      return;
-    }
-    console.log(resp.message);
   };
 
-  const getCount: { [key: string]: number } = {
-    "All Groups": data.length || 0,
-    Train: trainData.data.length || 0,
-    Valid: validData.data.length || 0,
-    Test: testData.data.length || 0,
-  };
+  const dataList = [
+    responseData,
+    responseDataTrain,
+    responseDataValid,
+    responseDataTest,
+  ];
+
+  const getCount = () => dataList[activeTab]?.length;
 
   return (
     <>
@@ -88,9 +116,12 @@ export default function Home() {
           <div className="text-[32px] text-dark font-semibold">
             Bone-fracture-detection
           </div>
-          <div className="pt-4 text-[18px] text-dark text-normal">
+          <div className="pt-4 text-[18px] text-gray-500 text-normal">
             {/*   <span className="font-medium">50</span> of{" "} */}
-            <span className="font-medium">{getCount[activeTab]}</span> images
+            <span className="font-medium text-[18px] text-dark">
+              {getCount()}
+            </span>{" "}
+            images
           </div>
         </div>
 
@@ -99,112 +130,23 @@ export default function Home() {
             <Tab
               key={i}
               name={text}
-              active={activeTab == text}
-              onTabChange={(text) => setActiveTab(text)}
+              active={activeTab == i}
+              onTabChange={(text) => setActiveTab(i)}
             />
           ))}
         </div>
-        <div className="mb-3 flex justify-end w-full">
-          <div
-            className="text-gray-500 p-2 cursor-pointer text-[12px]"
-            onClick={() => refresh()}
-          >
-            Refresh
-          </div>
-        </div>
+
         <div>
-          {activeTab == "All Groups" && (
-            <div>
-              {
-                <div className="flex flex-wrap gap-5">
-                  {data.length == 0 &&
-                  (loadingTrainData || loadingValueData || loadingTestData)
-                    ? skeleton.map((_, i) => <CardSkeleton key={i} />)
-                    : data.slice(0, 40).map((item, i) => (
-                        <Card
-                          key={i}
-                          text={item.label}
-                          image={item.image}
-                          onView={() => {
-                            setOpenModal(true);
-                          }}
-                        />
-                      ))}
-                </div>
-              }
-            </div>
-          )}
-
-          {activeTab == "Train" && (
-            <div>
-              {
-                <div className="flex flex-wrap gap-5">
-                  {loadingTrainData
-                    ? skeleton.map((_, i) => <CardSkeleton key={i} />)
-                    : trainData.data.slice(0, 10).map((item, i) => (
-                        <Card
-                          key={i}
-                          text={item.label}
-                          image={item.image}
-                          onView={() => {
-                            setOpenModal(true);
-                          }}
-                        />
-                      ))}
-                </div>
-              }
-            </div>
-          )}
-
-          {activeTab == "Value" && (
-            <div>
-              {
-                <div className="flex flex-wrap gap-5">
-                  {loadingValueData
-                    ? skeleton.map((_, i) => <CardSkeleton key={i} />)
-                    : validData.data.slice(0, 10).map((item, i) => (
-                        <Card
-                          key={i}
-                          text={item.label}
-                          image={item.image}
-                          onView={() => {
-                            setOpenModal(true);
-                          }}
-                        />
-                      ))}
-                </div>
-              }
-            </div>
-          )}
-          {activeTab == "Test" && (
-            <div>
-              {
-                <div className="flex flex-wrap gap-5">
-                  {loadingTestData
-                    ? skeleton.map((_, i) => <CardSkeleton key={i} />)
-                    : testData.data.slice(0, 10).map((item, i) => (
-                        <Card
-                          key={i}
-                          text={item.label}
-                          image={item.image}
-                          onView={() => {
-                            setOpenModal(true);
-                          }}
-                        />
-                      ))}
-                </div>
-              }
-            </div>
-          )}
-
-          <div className="flex justify-center">
-            <div className="flex"></div>
-          </div>
+          <TabPane
+            data={dataList[activeTab]}
+            loading={loading}
+            onViewImage={(photoData) => setOpenModal(photoData)}
+          />
         </div>
         <ImageModal
-          open={openModal}
-          image=""
-          onClose={() => setOpenModal(false)}
+          open={openModal ? true : false}
+          photoData={openModal}
+          onClose={() => setOpenModal(null)}
         />
       </main>
     </>
@@ -229,23 +171,3 @@ const Tab = ({
     {name}
   </div>
 );
-
-const data = [
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-  { text: "Tfdfdfdfdfdf dfdf", image: "" },
-];
