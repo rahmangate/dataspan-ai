@@ -40,7 +40,6 @@ export default function SideBar({ show, setter }: any) {
   const clearAll = () => {
     setSelectedClassFilter([]);
     setSelectType("Select All");
-    //handleSearchAll([]);
     setSelectedMinRange(0);
     setSelectedMaxRange(2);
   };
@@ -67,20 +66,23 @@ export default function SideBar({ show, setter }: any) {
 
   // Append class based on state of sidebar visiblity
   const appendClass = show
-    ? " fixed z-50 max-sm:ml-[0px] max-md:ml-[0px] transform-none"
+    ? " w-full flex-1 z-50 max-sm:ml-[0px] max-md:ml-[0px] transform-none" //fixed
     : "  ";
 
   return (
     <>
-      <aside
+      <div
         id="logo-sidebar"
-        className={`fixed md:sticky z-20  max-sm:ml-[0px] max-md:ml-[-352px]  p-4 min-w-[200px] max-w-[352px] min-w-[352px]  top-0  bottom-0  h-screen  transition-transform -translate-x-full  sm:translate-x-0  md:translate-x-0   ${appendClass}`}
+        // className={`relative md:sticky z-20 py-[20px] max-sm:ml-[0px] mr-[50px] max-md:mr-[10px]  min-w-[200px] max-w-[332px] min-w-[332px]  top-0  bottom-0  h-screen  transition-transform -translate-x-full  sm:translate-x-0  md:translate-x-0   ${appendClass}`} //max-md:ml-[-332px]
+        className={`w-full sm:max-w-[332px] py-[20px]`}
         aria-label="Sidebar"
       >
-        <div className="h-full w-full mx-auto  py-[15px] px-[20px]  rounded-[10px] border-[1px] border-gray-300  overflow-y-auto">
+        <div className="h-full w-full mx-auto  py-[15px] px-[23px]  rounded-[10px] border-[1px] border-gray-300  overflow-y-auto">
           <Logo />
           <div>
-            <div className="text-dark font-medium mt-5">Classes filter</div>
+            <div className="text-dark font-medium mt-[60px]">
+              Classes filter
+            </div>
             <div className="flex gap-2 mt-3">
               {["Select All", "Deselect All"].map((text, i) => (
                 <div
@@ -104,7 +106,7 @@ export default function SideBar({ show, setter }: any) {
               ))}
             </div>
 
-            <div className="flex flex-wrap py-2 gap-2">
+            <div className="flex flex-wrap py-2 gap-3 mb-2">
               {options.map((opt, i) => (
                 <Pill
                   key={i}
@@ -129,34 +131,8 @@ export default function SideBar({ show, setter }: any) {
                 setSelectedMinRange(minRange);
               }}
             />
-            {/* <div className="text-[16px] text-dark font-semibold mt-3 mb-2">
-              Poligon range
-            </div>
-            <div className="flex justify-between text-[12px] text-dark">
-              <div>
-                <span>min</span>
-                <span className="pl-1 font-semibold">{0}</span>
-              </div>
-              <div>
-                <span>max</span>
-                <span className="pl-1 font-semibold">{4}</span>
-              </div>
-            </div>
-            <div>
-              <div className="text-center text-dark">{range}</div>
-              <input
-                type="range"
-                className="h-2 bg-yellow-200  rounded-md appearance-none focus:outline-none focus:bg-yellow-300 w-full"
-                step={1}
-                max={4}
-                value={range}
-                onChange={(ev) => {
-                  setRange(parseInt(ev.target.value));
-                }}
-              />
-            </div> */}
 
-            <div className="flex justify-between items-center mt-3 ">
+            <div className="flex justify-between items-center mt-5 pl-3">
               <div
                 className="flex items-center cursor-pointer"
                 onClick={() => {
@@ -174,7 +150,7 @@ export default function SideBar({ show, setter }: any) {
             </div>
           </div>
         </div>
-      </aside>
+      </div>
 
       {/**overlay */}
       {show ? (

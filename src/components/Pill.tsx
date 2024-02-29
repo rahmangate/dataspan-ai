@@ -23,7 +23,9 @@ const Pill = ({
         onSelect(className, active);
       }}
     >
-      <div className={`w-[8px] h-[8px] rounded-full ${color[0]}`}></div>
+      <div
+        className={`w-[8px] h-[8px] rounded-full ${color[0]} mr-[2px]`}
+      ></div>
       <span className={`text-dark text-[12px] font-semibold`}>{text}</span>
     </div>
   );

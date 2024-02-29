@@ -15,8 +15,8 @@ const Card = ({
   onView: () => void;
 }) => {
   return (
-    <div className="w-[100px] cursor-pointer" onClick={() => onView()}>
-      <div className="relative w-[100px] h-[100px] bg-gray-100 ">
+    <div className="cursor-pointer" onClick={() => onView()}>
+      <div className="relative w-full h-[100px] sm:min-w-[100px] bg-gray-100 ">
         <Image
           src={photoData.thumbnail}
           width={600}

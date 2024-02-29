@@ -111,7 +111,7 @@ export default function Home() {
 
   return (
     <>
-      <main className="max-w-[996px] mx-auto p-2 pb-[50px]">
+      <main className="max-w-[996px] mx-auto py-[30px]">
         <div className="flex justify-between mb-7">
           <div className="text-[32px] text-dark font-semibold">
             Bone-fracture-detection
@@ -135,7 +135,6 @@ export default function Home() {
             />
           ))}
         </div>
-
         <div>
           <TabPane
             data={dataList[activeTab]}
@@ -163,7 +162,7 @@ const Tab = ({
   onTabChange: (name: string) => void;
 }) => (
   <div
-    className={`pt-1 h-[27px] px-3 text-dark text-[14px] cursor-pointer border-b-[1px] border-b-transparent hover:font-medium ${
+    className={`pt-1 h-[27px] px-3 text-dark text-[14px] font-normal cursor-pointer border-b-[1px] border-b-transparent ${
       active ? "text-yellow bg-yellow-50 font-medium border-b-yellow" : ""
     }`}
     onClick={() => onTabChange(name)}

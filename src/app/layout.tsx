@@ -26,7 +26,7 @@ export default function RootLayout({
       <head></head>
       <body className={montserrat.className}>
         <div>
-          <div className="flex mx-auto  min-h-screen">
+          <div className="flex flex-col md:flex-row md:gap-2 max-w-[1398px] px-[10px] mx-auto  min-h-screen">
             <SideBar
               show={showSidebar}
               setter={setShowSidebar}
